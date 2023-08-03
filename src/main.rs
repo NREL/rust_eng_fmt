@@ -1,9 +1,13 @@
 fn main() {
     println!("{}\n", format_f64_eng(std::f64::consts::PI, None));
-    println!("{}\n", format_f64_eng(333.3, None));
-    println!("{}\n", format_f64_eng(666.6, None));
-    println!("{}\n", format_f64_eng(22.2e3, None));
-    println!("{}\n", format_f64_eng(77.7e3, None));
+    println!("{}\n", format_f64_eng(33.333, None));
+    println!("{}\n", format_f64_eng(66.666, None));
+    println!("{}\n", format_f64_eng(333.33, None));
+    println!("{}\n", format_f64_eng(666.66, None));
+    println!("{}\n", format_f64_eng(3333.3, None));
+    println!("{}\n", format_f64_eng(6666.6, None));
+    println!("{}\n", format_f64_eng(33.333e6, None));
+    println!("{}\n", format_f64_eng(66.666e6, None));
 }
 
 /// Returns f64 as string in engineering notation with last digit
