@@ -7,7 +7,40 @@
 /// # Arguments
 /// * x - value to be formatted
 /// * s - number of significant figures, defaults to 3
-fn format_f64_eng(x: f64, s: Option<usize>) -> Result<String, String> {
+/// # Examples
+/// ```
+/// fn test_pi() {
+///     assert_eq!(
+///         eng_fmt::format_f64_eng(std::f64::consts::PI, None),
+///         Ok(String::from("3.14"))
+///     );
+/// }
+/// ```
+/// ```
+/// fn test_pi_5d() {
+///     assert_eq!(
+///         eng_fmt::format_f64_eng(std::f64::consts::PI, Some(5)),
+///         Ok(String::from("3.1415"))
+///     );
+/// }
+/// ```
+/// ```
+/// fn test_2pi_5d() {
+///     assert_eq!(
+///         eng_fmt::format_f64_eng(std::f64::consts::PI, Some(5)),
+///         Ok(String::from("3.1415"))
+///     );
+/// }
+/// ```
+/// ```
+/// fn test_err() {
+///     assert_eq!(
+///         eng_fmt::format_f64_eng(std::f64::consts::PI, Some(2)),
+///         Err("Number of significant figures `s` cannot be less than 3!".to_string())
+///     );
+/// }
+/// ```
+pub fn format_f64_eng(x: f64, s: Option<usize>) -> Result<String, String> {
     let s = s.unwrap_or(3);
     if s < 3 {
         return Err("Number of significant figures `s` cannot be less than 3!".to_string());
