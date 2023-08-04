@@ -85,12 +85,12 @@ mod tests {
         assert_eq!(format_f64_eng(666.66, None), Ok(String::from("667")));
     }
     #[test]
-    fn test_3333p3() {
+    fn test_3p3333e3() {
         assert_eq!(format_f64_eng(3.3333e3, None), Ok(String::from("3.33e3")));
     }
     #[test]
-    fn test_6666p6() {
-        assert_eq!(format_f64_eng(6.6666e3, None), Ok(String::from("667e3")));
+    fn test_6p6666e3() {
+        assert_eq!(format_f64_eng(6.6666e3, None), Ok(String::from("6.67e3")));
     }
     #[test]
     fn test_33p333e6() {
