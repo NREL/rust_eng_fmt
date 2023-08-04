@@ -76,7 +76,7 @@ mod tests {
     }
     #[test]
     fn test_333p33() {
-        assert_eq!(format_f64_eng(333.33, None), Ok(String::from("334")));
+        assert_eq!(format_f64_eng(333.33, None), Ok(String::from("333")));
     }
     #[test]
     fn test_666p66() {
