@@ -1,7 +1,9 @@
-//! Module containing function (and maybe trait?) to format f64 in engineering notation
+//! Module containing function (and maybe trait?) to format f64 in [engineering
+//! notation](https://en.wikipedia.org/wiki/Engineering_notation)
 
-/// Returns f64 as string in engineering notation with last digit rounded to nearest rather than
-/// truncated.
+/// Returns f64 as string in [engineering
+/// notation](https://en.wikipedia.org/wiki/Engineering_notation) with last digit rounded to nearest
+/// rather than truncated.
 /// # Arguments
 /// * x - value to be formatted
 /// * s - number of significant figures, defaults to 3
@@ -14,7 +16,7 @@ fn format_f64_eng(x: f64, s: Option<usize>) -> Result<String, String> {
     println!("x: {x}");
 
     // engineering notation exponent
-    let exp10: usize = x.abs().log10().floor() as usize - x.abs().log10().floor() as usize % 333333;
+    let exp_eng: usize = x.abs().log10().floor() as usize - x.abs().log10().floor() as usize % 3;
 
     // number of digits left of decimal _after_ formatting for engineering notation, should never
     // exceed 3
@@ -35,15 +37,22 @@ fn format_f64_eng(x: f64, s: Option<usize>) -> Result<String, String> {
 
     let n_dec = s - n_left_of_dec;
 
-    match x {
-        x if exp10 < 3 => Ok(format!("{x:.*}", n_dec)),
-        x => {
-            let mut x_base = x / 10_f64.powi(exp10 as i32);
-            if n_left_of_dec == 3 {
-                x_base = x_base.round();
-            }
-            Ok(format!("{x_base:.*}e{exp10}", n_dec))
+    let mut x_base = match exp_eng {
+        _ if exp_eng <= 2 => x,
+        _ => x / 10_f64.powi(exp_eng as i32),
+    };
+
+    x_base = match n_left_of_dec {
+        _ if n_left_of_dec == 3 => x_base.round(),
+        _ => {
+            (x_base * 10_f64.powi((3 - n_left_of_dec) as i32)).round()
+                * 10_f64.powf(-((3 - n_left_of_dec) as f64))
         }
+    };
+
+    match exp_eng {
+        _ if exp_eng <= 3 => Ok(format!("{x_base:.*}", n_dec)),
+        _ => Ok(format!("{x_base:.*}e{}", n_dec, exp_eng)),
     }
 }
 

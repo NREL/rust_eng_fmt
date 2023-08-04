@@ -2,3 +2,4 @@ This repo contains a Rust crate that formats `f64` as a `String` in [engineering
 
 # Roadmap
 
+- [ ] flesh out this bulleted list
