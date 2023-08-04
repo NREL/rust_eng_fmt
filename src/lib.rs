@@ -46,8 +46,6 @@ pub fn format_f64_eng(x: f64, s: Option<usize>) -> Result<String, String> {
         return Err("Number of significant figures `s` cannot be less than 3!".to_string());
     }
 
-    println!("x: {x}");
-
     // engineering notation exponent
     let exp_eng: usize = x.abs().log10().floor() as usize - x.abs().log10().floor() as usize % 3;
 
@@ -56,8 +54,6 @@ pub fn format_f64_eng(x: f64, s: Option<usize>) -> Result<String, String> {
     // number of digits left of decimal _after_ formatting for engineering notation, should never
     // exceed 3
     let n_left_of_dec: usize = x.abs().log10().floor() as usize % 3 + 1;
-
-    println!("{}", exp_sci);
 
     assert!(
         n_left_of_dec <= 3,
