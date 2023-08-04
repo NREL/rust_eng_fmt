@@ -40,6 +40,8 @@ fn format_f64_eng(x: f64, s: Option<usize>) -> Result<String, String> {
     };
 
     x_base = match n_left_of_dec {
+        // the other branch should work for this first case, but doing this separately should be
+        // more cpu efficient
         _ if n_left_of_dec == 3 => x_base.round(),
         _ => {
             (x_base * 10_f64.powi((s - n_left_of_dec) as i32)).round()
@@ -48,7 +50,7 @@ fn format_f64_eng(x: f64, s: Option<usize>) -> Result<String, String> {
     };
 
     match exp_eng {
-        _ if exp_eng <= 3 => Ok(format!("{x_base:.*}", n_dec)),
+        _ if exp_eng <= 2 => Ok(format!("{x_base:.*}", n_dec)),
         _ => Ok(format!("{x_base:.*}e{}", n_dec, exp_eng)),
     }
 }
