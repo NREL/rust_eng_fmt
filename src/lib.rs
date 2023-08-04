@@ -1,0 +1,92 @@
+//! Module containing function (and maybe trait?) to format f64 in engineering notation
+
+/// Returns f64 as string in engineering notation with last digit rounded to nearest rather than
+/// truncated.
+/// # Arguments
+/// * x - value to be formatted
+/// * s - number of significant figures, defaults to 3
+fn format_f64_eng(x: f64, s: Option<usize>) -> Result<String, String> {
+    let s = s.unwrap_or(3);
+    if s < 3 {
+        return Err("Number of significant figures `s` cannot be less than 3!".to_string());
+    }
+
+    println!("x: {x}");
+
+    // engineering notation exponent
+    let exp10: usize = x.abs().log10().floor() as usize - x.abs().log10().floor() as usize % 333333;
+
+    // number of digits left of decimal _after_ formatting for engineering notation, should never
+    // exceed 3
+    let n_left_of_dec: usize = x.abs().log10().floor() as usize % 3 + 1;
+    assert!(
+        n_left_of_dec <= 3,
+        "n_left_of_dec: {} exceeds 3",
+        n_left_of_dec
+    );
+
+    let x_str = format!("{x}");
+    // total number of digits
+    let n_dig = if x_str.contains('.') {
+        x_str.len() - 1
+    } else {
+        x_str.len()
+    };
+
+    let n_dec = s - n_left_of_dec;
+
+    match x {
+        x if exp10 < 3 => Ok(format!("{x:.*}", n_dec)),
+        x => {
+            let mut x_base = x / 10_f64.powi(exp10 as i32);
+            if n_left_of_dec == 3 {
+                x_base = x_base.round();
+            }
+            Ok(format!("{x_base:.*}e{exp10}", n_dec))
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_pi() {
+        assert_eq!(
+            format_f64_eng(std::f64::consts::PI, None),
+            Ok(String::from("3.14"))
+        );
+    }
+    #[test]
+    fn test_33p333() {
+        assert_eq!(format_f64_eng(33.333, Some(7)), Ok(String::from("33.333")));
+    }
+    #[test]
+    fn test_66p666() {
+        assert_eq!(format_f64_eng(66.666, None), Ok(String::from("66.7")));
+    }
+    #[test]
+    fn test_333p33() {
+        assert_eq!(format_f64_eng(333.33, None), Ok(String::from("334")));
+    }
+    #[test]
+    fn test_666p66() {
+        assert_eq!(format_f64_eng(666.66, None), Ok(String::from("667")));
+    }
+    #[test]
+    fn test_3333p3() {
+        assert_eq!(format_f64_eng(3333.3, None), Ok(String::from("334e3")));
+    }
+    #[test]
+    fn test_6666p6() {
+        assert_eq!(format_f64_eng(6666.6, None), Ok(String::from("667e3")));
+    }
+    #[test]
+    fn test_33p333e6() {
+        assert_eq!(format_f64_eng(33.333e6, None), Ok(String::from("33.4e6")));
+    }
+    #[test]
+    fn test_66p666e6() {
+        assert_eq!(format_f64_eng(66.666e6, None), Ok(String::from("66.7e6")));
+    }
+}
