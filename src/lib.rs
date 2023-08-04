@@ -18,9 +18,14 @@ fn format_f64_eng(x: f64, s: Option<usize>) -> Result<String, String> {
     // engineering notation exponent
     let exp_eng: usize = x.abs().log10().floor() as usize - x.abs().log10().floor() as usize % 3;
 
+    let exp_sci = x.abs().log10().floor() as usize;
+
     // number of digits left of decimal _after_ formatting for engineering notation, should never
     // exceed 3
     let n_left_of_dec: usize = x.abs().log10().floor() as usize % 3 + 1;
+
+    println!("{}", exp_sci);
+
     assert!(
         n_left_of_dec <= 3,
         "n_left_of_dec: {} exceeds 3",
@@ -37,8 +42,8 @@ fn format_f64_eng(x: f64, s: Option<usize>) -> Result<String, String> {
     x_base = match n_left_of_dec {
         _ if n_left_of_dec == 3 => x_base.round(),
         _ => {
-            (x_base * 10_f64.powi((3 - n_left_of_dec) as i32)).round()
-                * 10_f64.powf(-((3 - n_left_of_dec) as f64))
+            (x_base * 10_f64.powi((s - n_left_of_dec) as i32)).round()
+                * 10_f64.powf(-((s - n_left_of_dec) as f64))
         }
     };
 
@@ -60,7 +65,10 @@ mod tests {
     }
     #[test]
     fn test_33p333() {
-        assert_eq!(format_f64_eng(33.333, Some(7)), Ok(String::from("33.333")));
+        assert_eq!(
+            format_f64_eng(33.333, Some(7)),
+            Ok(String::from("33.33300"))
+        );
     }
     #[test]
     fn test_66p666() {
