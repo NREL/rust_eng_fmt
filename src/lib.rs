@@ -147,4 +147,12 @@ mod tests {
             Ok(String::from("-6.2832"))
         );
     }
+    #[test]
+    fn test_zero_5sf() {
+        assert_eq!(format_f64_eng(0., Some(5)), Ok(String::from("0.0000")));
+    }
+    #[test]
+    fn test_zero() {
+        assert_eq!(format_f64_eng(0., None), Ok(String::from("0.00")));
+    }
 }
