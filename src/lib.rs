@@ -27,7 +27,7 @@
 /// ```
 /// fn test_2pi_5d() {
 ///     assert_eq!(
-///         eng_fmt::format_f64_eng(std::f64::consts::PI, Some(5)),
+///         eng_fmt::format_f64_eng(std::f64::consts::PI * 2., Some(5)),
 ///         Ok(String::from("3.1415"))
 ///     );
 /// }
@@ -132,5 +132,19 @@ mod tests {
     #[test]
     fn test_66p666e6() {
         assert_eq!(format_f64_eng(66.666e6, None), Ok(String::from("66.7e6")));
+    }
+    #[test]
+    fn test_2pi_5d() {
+        assert_eq!(
+            format_f64_eng(std::f64::consts::PI * 2., Some(5)),
+            Ok(String::from("6.2832"))
+        );
+    }
+    #[test]
+    fn test_n2pi_5d() {
+        assert_eq!(
+            format_f64_eng(-std::f64::consts::PI * 2., Some(5)),
+            Ok(String::from("-6.2832"))
+        );
     }
 }
