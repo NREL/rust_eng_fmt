@@ -84,15 +84,15 @@ mod tests {
     }
     #[test]
     fn test_3333p3() {
-        assert_eq!(format_f64_eng(3333.3, None), Ok(String::from("334e3")));
+        assert_eq!(format_f64_eng(3.3333e3, None), Ok(String::from("3.33e3")));
     }
     #[test]
     fn test_6666p6() {
-        assert_eq!(format_f64_eng(6666.6, None), Ok(String::from("667e3")));
+        assert_eq!(format_f64_eng(6.6666e3, None), Ok(String::from("667e3")));
     }
     #[test]
     fn test_33p333e6() {
-        assert_eq!(format_f64_eng(33.333e6, None), Ok(String::from("33.4e6")));
+        assert_eq!(format_f64_eng(33.333e6, None), Ok(String::from("33.3e6")));
     }
     #[test]
     fn test_66p666e6() {
