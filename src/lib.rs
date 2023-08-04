@@ -27,14 +27,6 @@ fn format_f64_eng(x: f64, s: Option<usize>) -> Result<String, String> {
         n_left_of_dec
     );
 
-    let x_str = format!("{x}");
-    // total number of digits
-    let n_dig = if x_str.contains('.') {
-        x_str.len() - 1
-    } else {
-        x_str.len()
-    };
-
     let n_dec = s - n_left_of_dec;
 
     let mut x_base = match exp_eng {
