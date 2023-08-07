@@ -66,13 +66,32 @@ impl FormatEng for f64 {
             return Err("Number of significant figures `s` cannot be less than 3!".to_string());
         }
 
+        if *self == 0. {
+            return Ok(format!("{self:.*}", s - 1));
+        }
+
+        let abs_log10 = self.abs().log10();
+
+        let exp_sci: i32 = if abs_log10 >= 0. {
+            abs_log10.floor()
+        } else {
+            abs_log10.ceil()
+        } as i32;
+
         // engineering notation exponent
-        let exp_eng: usize =
-            self.abs().log10().floor() as usize - self.abs().log10().floor() as usize % 3;
+        let exp_eng: i32 = if abs_log10 >= 0. {
+            exp_sci - abs_log10.floor() as i32 % 3
+        } else {
+            exp_sci - abs_log10.ceil() as i32 % 3 - 3
+        };
 
         // number of digits left of decimal _after_ formatting for engineering notation, should never
         // exceed 3
-        let n_left_of_dec: usize = self.abs().log10().floor() as usize % 3 + 1;
+        let n_left_of_dec: usize = if abs_log10 > 0. {
+            abs_log10.floor() as usize % 3 + 1
+        } else {
+            3 + -(-abs_log10.ceil() as i32 % 3) as usize
+        };
 
         assert!(
             n_left_of_dec <= 3,
@@ -83,14 +102,16 @@ impl FormatEng for f64 {
         let n_dec = s - n_left_of_dec;
 
         let mut x_base = match exp_eng {
-            _ if exp_eng <= 2 => *self,
-            _ => self / 10_f64.powi(exp_eng as i32),
+            // _ if exp_eng < 0 => ,
+            _ if exp_eng.abs() <= 2 => *self,
+            _ => self / 10_f64.powi(exp_eng),
         };
 
+        // round `x_base` as appropriate
         x_base = match n_left_of_dec {
             // the other branch should work for this first case, but doing this separately should be
             // more cpu efficient
-            _ if n_left_of_dec == 3 => x_base.round(),
+            _ if n_left_of_dec == 3 && exp_eng > 0 => x_base.round(),
             _ => {
                 (x_base * 10_f64.powi((s - n_left_of_dec) as i32)).round()
                     * 10_f64.powf(-((s - n_left_of_dec) as f64))
@@ -98,7 +119,7 @@ impl FormatEng for f64 {
         };
 
         match exp_eng {
-            _ if exp_eng <= 2 => Ok(format!("{x_base:.*}", n_dec)),
+            _ if (0..=2).contains(&exp_eng) => Ok(format!("{x_base:.*}", n_dec)),
             _ => Ok(format!("{x_base:.*}e{}", n_dec, exp_eng)),
         }
     }
@@ -107,6 +128,34 @@ impl FormatEng for f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn test_pi_div_10() {
+        assert_eq!(
+            (std::f64::consts::PI / 10.).format_eng(None),
+            Ok(String::from("314e-3"))
+        );
+    }
+    #[test]
+    fn test_n_pi_div_10() {
+        assert_eq!(
+            (-std::f64::consts::PI / 10.).format_eng(None),
+            Ok(String::from("-314e-3"))
+        );
+    }
+    #[test]
+    fn test_pi_div_100() {
+        assert_eq!(
+            (std::f64::consts::PI / 10.).format_eng(None),
+            Ok(String::from("314e-3"))
+        );
+    }
+    #[test]
+    fn test_pi_div_1000() {
+        assert_eq!(
+            (std::f64::consts::PI / 10.).format_eng(None),
+            Ok(String::from("314e-3"))
+        );
+    }
     #[test]
     fn test_pi() {
         assert_eq!(
