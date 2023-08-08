@@ -52,10 +52,11 @@ impl FormatEng for f64 {
     /// }
     /// ```
     fn format_eng(&self, sf: Option<usize>) -> String {
-        let s = sf.unwrap_or(3);
+        let sf = sf.unwrap_or(3);
+        assert!(sf >= 1, "`format_eng` arg `sf` must be at least 1.");
 
         if *self == 0. {
-            return format!("{self:.*}", s - 1);
+            return format!("{self:.*}", sf - 1);
         }
 
         let abs_log10 = self.abs().log10();
@@ -75,10 +76,10 @@ impl FormatEng for f64 {
 
         // number of digits left of decimal _after_ formatting for engineering notation, should never
         // exceed 3
-        let n_left_of_dec: usize = if abs_log10 > 0. {
-            abs_log10.floor() as usize % 3 + 1
+        let n_left_of_dec: i32 = if abs_log10 > 0. {
+            abs_log10.floor() as i32 % 3 + 1
         } else {
-            3 + -(-abs_log10.ceil() as i32 % 3) as usize
+            3 + -(-abs_log10.ceil() as i32 % 3)
         };
 
         assert!(
@@ -87,7 +88,7 @@ impl FormatEng for f64 {
             n_left_of_dec
         );
 
-        let n_dec = s - n_left_of_dec;
+        let n_dec = sf as i32 - n_left_of_dec;
 
         let mut x_base = match exp_eng {
             // _ if exp_eng < 0 => ,
@@ -96,21 +97,35 @@ impl FormatEng for f64 {
         };
 
         // round `x_base` as appropriate
-        x_base = match n_left_of_dec {
-            // the other branch should work for this first case, but doing this separately should be
-            // more cpu efficient
-            _ if n_left_of_dec == 3 && exp_eng > 0 => x_base.round(),
-            _ => {
-                (x_base * 10_f64.powi((s - n_left_of_dec) as i32)).round()
-                    * 10_f64.powf(-((s - n_left_of_dec) as f64))
-            }
-        };
+        let exp = sf as i32 - n_left_of_dec;
+        x_base = (x_base * 10_f64.powi(exp)).round() * 10_f64.powi(-exp);
 
         match exp_eng {
-            _ if (0..=2).contains(&exp_eng) => format!("{x_base:.*}", n_dec),
-            _ => format!("{x_base:.*}e{}", n_dec, exp_eng),
+            _ if (0..=2).contains(&exp_eng) => format!("{x_base:.*}", n_dec.max(0) as usize),
+            _ => format!("{x_base:.*}e{}", n_dec.max(0) as usize, exp_eng),
         }
     }
+}
+
+#[allow(unused_macros)]
+#[macro_export]
+/// Generates a String similar to output of `dbg` but without printing.  
+/// https://doc.rust-lang.org/src/std/macros.rs.html#340-362
+macro_rules! format_dbg {
+    () => {
+        format!("[{}:{}]", file!(), line!())
+    };
+    ($val:expr $(,)?) => {
+        format!("[{}:{}] {} = {:#?}",
+            file!(),
+            line!(),
+            stringify!($val),
+            $val
+        )
+    };
+    ($($val:expr),+ $(,)?) => {
+        ($(format_dbg!($val)),+,)
+    };
 }
 
 #[cfg(test)]
@@ -203,6 +218,34 @@ mod tests {
         assert_eq!(
             (-std::f64::consts::PI * 2.).format_eng(Some(5)),
             String::from("-6.2832")
+        );
+    }
+    #[test]
+    fn test_n2pi_2d() {
+        assert_eq!(
+            (-std::f64::consts::PI * 2.).format_eng(Some(2)),
+            String::from("-6.3")
+        );
+    }
+    #[test]
+    fn test_n2pi_e5_2d() {
+        assert_eq!(
+            (-std::f64::consts::PI * 2. * 10_f64.powi(5)).format_eng(Some(2)),
+            String::from("-630e3")
+        );
+    }
+    #[test]
+    fn test_2pi_e5_1d() {
+        assert_eq!(
+            (std::f64::consts::PI * 2. * 10_f64.powi(5)).format_eng(Some(1)),
+            String::from("600e3")
+        );
+    }
+    #[test]
+    fn test_pi_1d() {
+        assert_eq!(
+            (std::f64::consts::PI).format_eng(Some(1)),
+            String::from("3")
         );
     }
     #[test]
