@@ -4,16 +4,11 @@
 /// Trait providing method for formatting numbers in [engineering
 /// notation](https://en.wikipedia.org/wiki/Engineering_notation)
 pub trait FormatEng {
+    /// Method for converting numeric value into formatted string with engineering notation
     fn format_eng(&self, sf: Option<usize>) -> String;
 }
 
 impl FormatEng for f64 {
-    /// Returns f64 as string in [engineering
-    /// notation](https://en.wikipedia.org/wiki/Engineering_notation) with last digit rounded to nearest
-    /// rather than truncated.
-    /// # Arguments
-    /// * x - value to be formatted
-    /// * s - number of significant figures, defaults to 3
     /// # Examples
     /// ```
     /// fn test_one() {
@@ -50,60 +45,70 @@ impl FormatEng for f64 {
     ///         String::from("3.1415")
     ///     );
     /// }
-    /// ```
     fn format_eng(&self, sf: Option<usize>) -> String {
-        let sf = sf.unwrap_or(3);
-        assert!(sf >= 1, "`format_eng` arg `sf` must be at least 1.");
+        format_eng(*self, sf)
+    }
+}
 
-        if *self == 0. {
-            return format!("{self:.*}", sf - 1);
-        }
+/// Returns f64 as string in [engineering
+/// notation](https://en.wikipedia.org/wiki/Engineering_notation) with last digit rounded to nearest
+/// rather than truncated.
+/// # Arguments
+/// * x - value to be formatted
+/// * s - number of significant figures, defaults to 3
+/// ```
+pub fn format_eng(x: f64, sf: Option<usize>) -> String {
+    let sf = sf.unwrap_or(3);
+    assert!(sf >= 1, "`format_eng` arg `sf` must be at least 1.");
 
-        let abs_log10 = self.abs().log10();
+    if x == 0. {
+        return format!("{x:.*}", sf - 1);
+    }
 
-        let exp_sci: i32 = if abs_log10 >= 0. {
-            abs_log10.floor()
-        } else {
-            abs_log10.ceil()
-        } as i32;
+    let abs_log10 = x.abs().log10();
 
-        // engineering notation exponent
-        let exp_eng: i32 = if abs_log10 >= 0. {
-            exp_sci - abs_log10.floor() as i32 % 3
-        } else {
-            exp_sci - abs_log10.ceil() as i32 % 3 - 3
-        };
+    let exp_sci: i32 = if abs_log10 >= 0. {
+        abs_log10.floor()
+    } else {
+        abs_log10.ceil()
+    } as i32;
 
-        // number of digits left of decimal _after_ formatting for engineering notation, should never
-        // exceed 3
-        let n_left_of_dec: i32 = if abs_log10 > 0. {
-            abs_log10.floor() as i32 % 3 + 1
-        } else {
-            3 + -(-abs_log10.ceil() as i32 % 3)
-        };
+    // engineering notation exponent
+    let exp_eng: i32 = if abs_log10 >= 0. {
+        exp_sci - abs_log10.floor() as i32 % 3
+    } else {
+        exp_sci - abs_log10.ceil() as i32 % 3 - 3
+    };
 
-        assert!(
-            n_left_of_dec <= 3,
-            "n_left_of_dec: {} exceeds 3",
-            n_left_of_dec
-        );
+    // number of digits left of decimal _after_ formatting for engineering notation, should never
+    // exceed 3
+    let n_left_of_dec: i32 = if abs_log10 > 0. {
+        abs_log10.floor() as i32 % 3 + 1
+    } else {
+        3 + -(-abs_log10.ceil() as i32 % 3)
+    };
 
-        let n_dec = sf as i32 - n_left_of_dec;
+    assert!(
+        n_left_of_dec <= 3,
+        "n_left_of_dec: {} exceeds 3",
+        n_left_of_dec
+    );
 
-        let mut x_base = match exp_eng {
-            // _ if exp_eng < 0 => ,
-            _ if exp_eng.abs() <= 2 => *self,
-            _ => self / 10_f64.powi(exp_eng),
-        };
+    let n_dec = sf as i32 - n_left_of_dec;
 
-        // round `x_base` as appropriate
-        let exp = sf as i32 - n_left_of_dec;
-        x_base = (x_base * 10_f64.powi(exp)).round() * 10_f64.powi(-exp);
+    let mut x_base = match exp_eng {
+        // _ if exp_eng < 0 => ,
+        _ if exp_eng.abs() <= 2 => x,
+        _ => x / 10_f64.powi(exp_eng),
+    };
 
-        match exp_eng {
-            _ if (0..=2).contains(&exp_eng) => format!("{x_base:.*}", n_dec.max(0) as usize),
-            _ => format!("{x_base:.*}e{}", n_dec.max(0) as usize, exp_eng),
-        }
+    // round `x_base` as appropriate
+    let exp = sf as i32 - n_left_of_dec;
+    x_base = (x_base * 10_f64.powi(exp)).round() * 10_f64.powi(-exp);
+
+    match exp_eng {
+        _ if (0..=2).contains(&exp_eng) => format!("{x_base:.*}", n_dec.max(0) as usize),
+        _ => format!("{x_base:.*}e{}", n_dec.max(0) as usize, exp_eng),
     }
 }
 
