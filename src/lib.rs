@@ -4,7 +4,7 @@
 /// Trait providing method for formatting numbers in [engineering
 /// notation](https://en.wikipedia.org/wiki/Engineering_notation)
 pub trait FormatEng {
-    fn format_eng(&self, sf: Option<usize>) -> Result<String, String>;
+    fn format_eng(&self, sf: Option<usize>) -> String;
 }
 
 impl FormatEng for f64 {
@@ -20,7 +20,7 @@ impl FormatEng for f64 {
     ///     use eng_fmt::FormatEng;
     ///     assert_eq!(
     ///         1_f64.format_eng(None),
-    ///         Ok(String::from("001"))
+    ///         String::from("001")
     ///     );
     /// }
     /// ```
@@ -29,7 +29,7 @@ impl FormatEng for f64 {
     ///     use eng_fmt::FormatEng;
     ///     assert_eq!(
     ///         std::f64::consts::PI.format_eng(None),
-    ///         Ok(String::from("3.14"))
+    ///         String::from("3.14")
     ///     );
     /// }
     /// ```
@@ -38,7 +38,7 @@ impl FormatEng for f64 {
     ///     use eng_fmt::FormatEng;
     ///     assert_eq!(
     ///         std::f64::consts::PI.format_eng(Some(5)),
-    ///         Ok(String::from("3.1415"))
+    ///         String::from("3.1415")
     ///     );
     /// }
     /// ```
@@ -47,27 +47,15 @@ impl FormatEng for f64 {
     ///     use eng_fmt::FormatEng;
     ///     assert_eq!(
     ///         (std::f64::consts::PI * 2.).format_eng(Some(5)),
-    ///         Ok(String::from("3.1415"))
+    ///         String::from("3.1415")
     ///     );
     /// }
     /// ```
-    /// ```
-    /// fn test_err() {
-    ///     use eng_fmt::FormatEng;
-    ///     assert_eq!(
-    ///         std::f64::consts::PI.format_eng(Some(2)),
-    ///         Err("Number of significant figures `s` cannot be less than 3!".to_string())
-    ///     );
-    /// }
-    /// ```
-    fn format_eng(&self, sf: Option<usize>) -> Result<String, String> {
+    fn format_eng(&self, sf: Option<usize>) -> String {
         let s = sf.unwrap_or(3);
-        if s < 3 {
-            return Err("Number of significant figures `s` cannot be less than 3!".to_string());
-        }
 
         if *self == 0. {
-            return Ok(format!("{self:.*}", s - 1));
+            return format!("{self:.*}", s - 1);
         }
 
         let abs_log10 = self.abs().log10();
@@ -119,8 +107,8 @@ impl FormatEng for f64 {
         };
 
         match exp_eng {
-            _ if (0..=2).contains(&exp_eng) => Ok(format!("{x_base:.*}", n_dec)),
-            _ => Ok(format!("{x_base:.*}e{}", n_dec, exp_eng)),
+            _ if (0..=2).contains(&exp_eng) => format!("{x_base:.*}", n_dec),
+            _ => format!("{x_base:.*}e{}", n_dec, exp_eng),
         }
     }
 }
@@ -129,92 +117,100 @@ impl FormatEng for f64 {
 mod tests {
     use super::*;
     #[test]
+    fn test_2() {
+        assert_eq!(2_f64.format_eng(None), String::from("2.00"));
+    }
+    #[test]
     fn test_pi_div_10() {
         assert_eq!(
             (std::f64::consts::PI / 10.).format_eng(None),
-            Ok(String::from("314e-3"))
+            String::from("314e-3")
+        );
+    }
+    #[test]
+    fn test_pi_div_5() {
+        assert_eq!(
+            (std::f64::consts::PI / 5.).format_eng(Some(4)),
+            String::from("628.3e-3")
         );
     }
     #[test]
     fn test_n_pi_div_10() {
         assert_eq!(
             (-std::f64::consts::PI / 10.).format_eng(None),
-            Ok(String::from("-314e-3"))
+            String::from("-314e-3")
         );
     }
     #[test]
     fn test_pi_div_100() {
         assert_eq!(
             (std::f64::consts::PI / 10.).format_eng(None),
-            Ok(String::from("314e-3"))
+            String::from("314e-3")
         );
     }
     #[test]
     fn test_pi_div_1000() {
         assert_eq!(
             (std::f64::consts::PI / 10.).format_eng(None),
-            Ok(String::from("314e-3"))
+            String::from("314e-3")
         );
     }
     #[test]
     fn test_pi() {
-        assert_eq!(
-            std::f64::consts::PI.format_eng(None),
-            Ok(String::from("3.14"))
-        );
+        assert_eq!(std::f64::consts::PI.format_eng(None), String::from("3.14"));
     }
     #[test]
     fn test_33p333() {
-        assert_eq!(33.333_f64.format_eng(Some(7)), Ok(String::from("33.33300")));
+        assert_eq!(33.333_f64.format_eng(Some(7)), String::from("33.33300"));
     }
     #[test]
     fn test_66p666() {
-        assert_eq!(66.666_f64.format_eng(None), Ok(String::from("66.7")));
+        assert_eq!(66.666_f64.format_eng(None), String::from("66.7"));
     }
     #[test]
     fn test_333p33() {
-        assert_eq!(333.33_f64.format_eng(None), Ok(String::from("333")));
+        assert_eq!(333.33_f64.format_eng(None), String::from("333"));
     }
     #[test]
     fn test_666p66() {
-        assert_eq!(666.66_f64.format_eng(None), Ok(String::from("667")));
+        assert_eq!(666.66_f64.format_eng(None), String::from("667"));
     }
     #[test]
     fn test_3p3333e3() {
-        assert_eq!(3.3333e3_f64.format_eng(None), Ok(String::from("3.33e3")));
+        assert_eq!(3.3333e3_f64.format_eng(None), String::from("3.33e3"));
     }
     #[test]
     fn test_6p6666e3() {
-        assert_eq!(6.6666e3_f64.format_eng(None), Ok(String::from("6.67e3")));
+        assert_eq!(6.6666e3_f64.format_eng(None), String::from("6.67e3"));
     }
     #[test]
     fn test_33p333e6() {
-        assert_eq!(33.333e6_f64.format_eng(None), Ok(String::from("33.3e6")));
+        assert_eq!(33.333e6_f64.format_eng(None), String::from("33.3e6"));
     }
     #[test]
     fn test_66p666e6() {
-        assert_eq!(66.666e6_f64.format_eng(None), Ok(String::from("66.7e6")));
+        assert_eq!(66.666e6_f64.format_eng(None), String::from("66.7e6"));
     }
     #[test]
     fn test_2pi_5d() {
         assert_eq!(
             (std::f64::consts::PI * 2.).format_eng(Some(5)),
-            Ok(String::from("6.2832"))
+            String::from("6.2832")
         );
     }
     #[test]
     fn test_n2pi_5d() {
         assert_eq!(
             (-std::f64::consts::PI * 2.).format_eng(Some(5)),
-            Ok(String::from("-6.2832"))
+            String::from("-6.2832")
         );
     }
     #[test]
     fn test_zero_5sf() {
-        assert_eq!(0_f64.format_eng(Some(5)), Ok(String::from("0.0000")));
+        assert_eq!(0_f64.format_eng(Some(5)), String::from("0.0000"));
     }
     #[test]
     fn test_zero() {
-        assert_eq!(0_f64.format_eng(None), Ok(String::from("0.00")));
+        assert_eq!(0_f64.format_eng(None), String::from("0.00"));
     }
 }
