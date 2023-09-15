@@ -1,10 +1,48 @@
 //! Module containing trait to format f64 in [engineering
-//! notation](https://en.wikipedia.org/wiki/Engineering_notation)
+//! notation](https://en.wikipedia.org/wiki/Engineering_notation).  
+//!
+//! # Examples
+//! ```
+//! fn test_one() {
+//!     use eng_fmt::FormatEng;
+//!     assert_eq!(
+//!         1_f64.format_eng(None),
+//!         String::from("001")
+//!     );
+//! }
+//! ```
+//! ```
+//! fn test_pi() {
+//!     use eng_fmt::FormatEng;
+//!     assert_eq!(
+//!         std::f64::consts::PI.format_eng(None),
+//!         String::from("3.14")
+//!     );
+//! }
+//! ```
+//! ```rust
+//! fn test_pi_5d() {
+//!     use eng_fmt::FormatEng;
+//!     assert_eq!(
+//!         std::f64::consts::PI.format_eng(Some(5)),
+//!         String::from("3.1415")
+//!     );
+//! }
+//! ```
+//! ```
+//! fn test_2pi_5d() {
+//!     use eng_fmt::FormatEng;
+//!     assert_eq!(
+//!         (std::f64::consts::PI * 2.).format_eng(Some(5)),
+//!         String::from("3.1415")
+//!     );
+//! }
 
 /// Trait providing method for formatting numbers in [engineering
 /// notation](https://en.wikipedia.org/wiki/Engineering_notation)
 pub trait FormatEng {
-    /// Method for converting numeric value into formatted string with engineering notation
+    /// Method for converting numeric value into formatted string with [engineering
+    /// notation](https://en.wikipedia.org/wiki/Engineering_notation)
     fn format_eng(&self, sf: Option<usize>) -> String;
 }
 
@@ -14,44 +52,8 @@ impl FormatEng for f64 {
     /// rather than truncated.
     ///
     /// # Arguments
-    /// - sf - Number of significant figures, defaults to 3
+    /// - `sf` - Number of significant figures, defaults to 3
     ///
-    /// # Examples
-    /// ```
-    /// fn test_one() {
-    ///     use eng_fmt::FormatEng;
-    ///     assert_eq!(
-    ///         1_f64.format_eng(None),
-    ///         String::from("001")
-    ///     );
-    /// }
-    /// ```
-    /// ```
-    /// fn test_pi() {
-    ///     use eng_fmt::FormatEng;
-    ///     assert_eq!(
-    ///         std::f64::consts::PI.format_eng(None),
-    ///         String::from("3.14")
-    ///     );
-    /// }
-    /// ```
-    /// ```
-    /// fn test_pi_5d() {
-    ///     use eng_fmt::FormatEng;
-    ///     assert_eq!(
-    ///         std::f64::consts::PI.format_eng(Some(5)),
-    ///         String::from("3.1415")
-    ///     );
-    /// }
-    /// ```
-    /// ```
-    /// fn test_2pi_5d() {
-    ///     use eng_fmt::FormatEng;
-    ///     assert_eq!(
-    ///         (std::f64::consts::PI * 2.).format_eng(Some(5)),
-    ///         String::from("3.1415")
-    ///     );
-    /// }
     fn format_eng(&self, sf: Option<usize>) -> String {
         format_eng(*self, sf)
     }
@@ -61,8 +63,8 @@ impl FormatEng for f64 {
 /// notation](https://en.wikipedia.org/wiki/Engineering_notation) with last digit rounded to nearest
 /// rather than truncated.
 /// # Arguments
-/// * x - value to be formatted
-/// * s - number of significant figures, defaults to 3
+/// - `x` - value to be formatted
+/// - `sf` - number of significant figures, defaults to 3
 pub fn format_eng(x: f64, sf: Option<usize>) -> String {
     let sf = sf.unwrap_or(3);
     assert!(sf >= 1, "`format_eng` arg `sf` must be at least 1.");
@@ -125,9 +127,8 @@ pub fn format_eng(x: f64, sf: Option<usize>) -> String {
 }
 
 #[allow(unused_macros)]
-#[macro_export]
 /// Generates a String similar to output of `dbg` but without printing.  
-/// https://doc.rust-lang.org/src/std/macros.rs.html#340-362
+/// <https://doc.rust-lang.org/src/std/macros.rs.html#340-362>
 macro_rules! format_dbg {
     () => {
         format!("[{}:{}]", file!(), line!())
