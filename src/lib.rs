@@ -98,8 +98,10 @@ pub fn format_eng(x: f64, sf: Option<usize>) -> String {
         abs_log10.floor() as i32 % 3 + 1
     } else if abs_log10 == 0. {
         1
+    } else if abs_log10.fract() == 0. {
+        3 - (-(abs_log10 as i32 + 1) % 3)
     } else {
-        3 + -(-abs_log10.ceil() as i32 % 3)
+        3 - (-abs_log10.ceil() as i32 % 3)
     };
 
     assert!(
