@@ -9,6 +9,13 @@ pub trait FormatEng {
 }
 
 impl FormatEng for f64 {
+    /// Returns f64 as string in [engineering
+    /// notation](https://en.wikipedia.org/wiki/Engineering_notation) with last digit rounded to nearest
+    /// rather than truncated.
+    ///
+    /// # Arguments
+    /// - sf - Number of significant figures, defaults to 3
+    ///
     /// # Examples
     /// ```
     /// fn test_one() {
@@ -56,7 +63,6 @@ impl FormatEng for f64 {
 /// # Arguments
 /// * x - value to be formatted
 /// * s - number of significant figures, defaults to 3
-/// ```
 pub fn format_eng(x: f64, sf: Option<usize>) -> String {
     let sf = sf.unwrap_or(3);
     assert!(sf >= 1, "`format_eng` arg `sf` must be at least 1.");
@@ -80,6 +86,12 @@ pub fn format_eng(x: f64, sf: Option<usize>) -> String {
         exp_sci - abs_log10.ceil() as i32 % 3 - 3
     };
 
+    let mut x_base = match exp_eng {
+        // _ if exp_eng < 0 => ,
+        _ if exp_eng.abs() <= 2 => x,
+        _ => x / 10_f64.powi(exp_eng),
+    };
+
     // number of digits left of decimal _after_ formatting for engineering notation, should never
     // exceed 3
     let n_left_of_dec: i32 = if abs_log10 > 0. {
@@ -95,12 +107,6 @@ pub fn format_eng(x: f64, sf: Option<usize>) -> String {
     );
 
     let n_dec = sf as i32 - n_left_of_dec;
-
-    let mut x_base = match exp_eng {
-        // _ if exp_eng < 0 => ,
-        _ if exp_eng.abs() <= 2 => x,
-        _ => x / 10_f64.powi(exp_eng),
-    };
 
     // round `x_base` as appropriate
     let exp = sf as i32 - n_left_of_dec;
@@ -262,7 +268,31 @@ mod tests {
         assert_eq!(0_f64.format_eng(None), String::from("0.00"));
     }
     #[test]
-    fn test_1div1000() {
-        assert_eq!(0.001.format_eng(None), String::from("1e-3"));
+    fn test_1_000() {
+        assert_eq!(1e3.format_eng(None), String::from("1.00e3"));
+    }
+    #[test]
+    fn test_1div10_000() {
+        assert_eq!(1e-4.format_eng(None), String::from("100e-6"));
+    }
+    #[test]
+    fn test_1div1_000() {
+        assert_eq!(0.001.format_eng(None), String::from("1.00e-3"));
+    }
+    #[test]
+    fn test_1div100() {
+        assert_eq!(0.010.format_eng(None), String::from("10.0e-3"));
+    }
+    #[test]
+    fn test_1div10() {
+        assert_eq!(0.100.format_eng(None), String::from("100e-3"));
+    }
+    #[test]
+    fn test_1() {
+        assert_eq!(1.0.format_eng(None), String::from("1.00"));
+    }
+    #[test]
+    fn test_10() {
+        assert_eq!(10.0.format_eng(None), String::from("10.0"));
     }
 }
