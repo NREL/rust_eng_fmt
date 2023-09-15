@@ -5,6 +5,7 @@ edition = "2021"
 description = "Zero-depedency rate containing trait providing engineering notation formatting for f64"
 license = "BSD-3-Clause"
 authors = ["Chad Baker"]
+repository = "https://github.com/NREL/rust_eng_fmt"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
