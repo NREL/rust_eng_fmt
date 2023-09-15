@@ -96,6 +96,8 @@ pub fn format_eng(x: f64, sf: Option<usize>) -> String {
     // exceed 3
     let n_left_of_dec: i32 = if abs_log10 > 0. {
         abs_log10.floor() as i32 % 3 + 1
+    } else if abs_log10 == 0. {
+        1
     } else {
         3 + -(-abs_log10.ceil() as i32 % 3)
     };
