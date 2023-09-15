@@ -261,4 +261,8 @@ mod tests {
     fn test_zero() {
         assert_eq!(0_f64.format_eng(None), String::from("0.00"));
     }
+    #[test]
+    fn test_1div1000() {
+        assert_eq!(0.001.format_eng(None), String::from("1e-3"));
+    }
 }
