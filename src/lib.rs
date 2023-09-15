@@ -82,6 +82,8 @@ pub fn format_eng(x: f64, sf: Option<usize>) -> String {
     // engineering notation exponent
     let exp_eng: i32 = if abs_log10 >= 0. {
         exp_sci - abs_log10.floor() as i32 % 3
+    } else if abs_log10.fract() == 0. && abs_log10.abs() as u32 % 3 == 0 {
+        exp_sci - abs_log10.ceil() as i32 % 3
     } else {
         exp_sci - abs_log10.ceil() as i32 % 3 - 3
     };
@@ -274,6 +276,10 @@ mod tests {
     #[test]
     fn test_1_000() {
         assert_eq!(1e3.format_eng(None), String::from("1.00e3"));
+    }
+    #[test]
+    fn test_1div1e6() {
+        assert_eq!(1e-6.format_eng(None), String::from("1.00e-6"));
     }
     #[test]
     fn test_1div10_000() {
