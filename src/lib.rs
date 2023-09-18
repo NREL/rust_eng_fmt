@@ -15,6 +15,13 @@
 //! let expected = "3.142".to_string();
 //! assert_eq!(x.format_eng(Some(4)), expected);
 //! ```
+//!
+//! ```
+//! use eng_fmt::FormatEng;
+//! let x = 6.022e-23;
+//! let expected = "60.2e-24".to_string();
+//! assert_eq!(x.format_eng(None), expected);
+//! ```
 
 /// Trait providing method for formatting numbers in [engineering
 /// notation](https://en.wikipedia.org/wiki/Engineering_notation)
