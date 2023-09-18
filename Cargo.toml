@@ -1,6 +1,6 @@
 [package]
 name = "eng_fmt"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 description = "Zero-depedency rate containing trait providing engineering notation formatting for f64"
 license = "BSD-3-Clause"
