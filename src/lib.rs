@@ -3,40 +3,18 @@
 //!
 //! # Examples
 //! ```
-//! fn test_one() {
-//!     use eng_fmt::FormatEng;
-//!     assert_eq!(
-//!         1_f64.format_eng(None),
-//!         String::from("001")
-//!     );
-//! }
+//! use eng_fmt::FormatEng;
+//! let x: f64 = 0.010;
+//! let expected = "10.0e-3".to_string();
+//! assert_eq!(x.format_eng(None), expected);
 //! ```
+//!
 //! ```
-//! fn test_pi() {
-//!     use eng_fmt::FormatEng;
-//!     assert_eq!(
-//!         std::f64::consts::PI.format_eng(None),
-//!         String::from("3.14")
-//!     );
-//! }
+//! use eng_fmt::FormatEng;
+//! let x = std::f64::consts::PI;
+//! let expected = "3.142".to_string();
+//! assert_eq!(x.format_eng(Some(4)), expected);
 //! ```
-//! ```rust
-//! fn test_pi_5d() {
-//!     use eng_fmt::FormatEng;
-//!     assert_eq!(
-//!         std::f64::consts::PI.format_eng(Some(5)),
-//!         String::from("3.1415")
-//!     );
-//! }
-//! ```
-//! ```
-//! fn test_2pi_5d() {
-//!     use eng_fmt::FormatEng;
-//!     assert_eq!(
-//!         (std::f64::consts::PI * 2.).format_eng(Some(5)),
-//!         String::from("3.1415")
-//!     );
-//! }
 
 /// Trait providing method for formatting numbers in [engineering
 /// notation](https://en.wikipedia.org/wiki/Engineering_notation)
@@ -305,5 +283,18 @@ mod tests {
     #[test]
     fn test_10() {
         assert_eq!(10.0.format_eng(None), String::from("10.0"));
+    }
+
+    #[test]
+    fn test_one() {
+        assert_eq!(1_f64.format_eng(None), String::from("1.00"));
+    }
+
+    #[test]
+    fn test_pi_5d() {
+        assert_eq!(
+            std::f64::consts::PI.format_eng(Some(5)),
+            String::from("3.1416")
+        );
     }
 }
